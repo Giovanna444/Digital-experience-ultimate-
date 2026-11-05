@@ -1,0 +1,85 @@
+void mostrarStatus(const char* mensagem) {
+  lcd.setCursor(0, 1);
+  lcd.print("                ");
+  lcd.setCursor(0, 1);
+  lcd.print(mensagem);
+}
+
+void mostrarMenu() {
+  lcd.clear();
+
+  lcd.setCursor(0, 0);
+  lcd.print("> ");
+  lcd.print(musicas[musicaAtual]);
+
+  mostrarStatus("Selecionada");
+}
+
+void pararMusica() {
+  noTone(BUZZER);
+
+  tocando = false;
+  pausado = false;
+  notaAtual = 0;
+
+  atualizarLEDs();
+  mostrarStatus("Parado");
+}
+
+void iniciarMusica() {
+  noTone(BUZZER);
+
+  notaAtual = 0;
+  tocando = true;
+  pausado = false;
+
+  tempoNota = millis();
+  tone(BUZZER, notas[notaAtual]);
+
+  atualizarLEDs();
+  mostrarStatus("Tocando...");
+}
+
+void pausarMusica() {
+  pausado = true;
+  inicioPausa = millis();
+
+  noTone(BUZZER);
+
+  atualizarLEDs();
+  mostrarStatus("Pausado");
+}
+
+void continuarMusica() {
+  tempoNota += millis() - inicioPausa;
+
+  pausado = false;
+  tone(BUZZER, notas[notaAtual]);
+
+  atualizarLEDs();
+  mostrarStatus("Tocando...");
+}
+
+void atualizarMusica() {
+  if (!tocando || pausado) {
+    return;
+  }
+
+  if (millis() - tempoNota >= duracoes[notaAtual]) {
+    notaAtual++;
+
+    if (notaAtual >= totalNotas) {
+      noTone(BUZZER);
+
+      tocando = false;
+      pausado = false;
+
+      atualizarLEDs();
+      mostrarStatus("Fim da musica");
+      return;
+    }
+
+    tempoNota = millis();
+    tone(BUZZER, notas[notaAtual]);
+  }
+}
